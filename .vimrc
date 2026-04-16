@@ -18,14 +18,9 @@ Plug 'nelsyeung/twig.vim'
 " --- Autocompletado LSP-like ---
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
-
 " --- Fuzzy finder ---
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-
-" --- Git ---
-Plug 'tpope/vim-fugitive'
-Plug 'airblade/vim-gitgutter'
 
 " --- Utilidades Laravel / PHP ---
 Plug 'tpope/vim-commentary'
@@ -40,11 +35,9 @@ set nocompatible
 set encoding=utf-8
 set fileencoding=utf-8
 
-" Números de línea
 set number
 set relativenumber
 
-" Indentación
 set tabstop=2
 set shiftwidth=2
 set softtabstop=2
@@ -52,13 +45,11 @@ set expandtab
 set autoindent
 set smartindent
 
-" Búsqueda
 set ignorecase
 set smartcase
 set hlsearch
 set incsearch
 
-" UI
 set cursorline
 set showmatch
 set scrolloff=8
@@ -74,17 +65,13 @@ set lazyredraw
 set updatetime=300
 set ttimeoutlen=10
 
-" Sin archivos de swap
 set noswapfile
 set nobackup
 set undofile
 set undodir=~/.vim/undo
 
-" Dividir ventanas de forma natural
 set splitbelow
 set splitright
-
-" Clipboard
 set clipboard=unnamed
 
 " ── COLORES ──────────────────────────────────────────────────
@@ -100,33 +87,53 @@ set noshowmode
 " ── LEADER ───────────────────────────────────────────────────
 let mapleader = " "
 
+" ── FZF — ignorar vendor, node_modules, .git, etc ───────────
+if executable('fd')
+  let $FZF_DEFAULT_COMMAND = 'fd --type f --hidden --follow --exclude .git --exclude vendor --exclude node_modules --exclude public/storage --exclude storage/framework --exclude bootstrap/cache'
+else
+  let $FZF_DEFAULT_COMMAND = 'find . -type f -not -path "./.git/*" -not -path "./vendor/*" -not -path "./node_modules/*" -not -path "./storage/framework/*" -not -path "./bootstrap/cache/*"'
+endif
+
+" Navegación con j/k dentro del popup de FZF
+let $FZF_DEFAULT_OPTS = '--bind=ctrl-j:down,ctrl-k:up'
+
+" Sin preview, ventana compacta abajo
+let g:fzf_layout = { 'down': '~30%' }
+let g:fzf_preview_window = []
+
+" Ripgrep también respeta los mismos filtros
+command! -bang -nargs=* Rg
+  \ call fzf#vim#grep(
+  \   'rg --column --line-number --no-heading --color=always --smart-case
+  \       --glob "!vendor" --glob "!node_modules" --glob "!.git"
+  \       --glob "!storage/framework" --glob "!bootstrap/cache" -- '.shellescape(<q-args>),
+  \   fzf#vim#with_preview({'options': '--no-preview'}), <bang>0)
+
 " ── KEYMAPS ──────────────────────────────────────────────────
 
-" --- Explorador de archivos (netrw estilo :Ex) ---
-" Leader e → guarda, cierra el archivo actual y abre netrw
+" --- Explorador de archivos ---
 nnoremap <leader>e :w<CR>:Explore<CR>
 
-" --- Terminal dentro de Vim ---
-" Leader t → abre terminal abajo
+" --- Terminal ---
 nnoremap <leader>t :botright terminal<CR>
-" Salir del modo insert de la terminal con Esc
 tnoremap <Esc> <C-\><C-n>
 
-" --- Alternar entre los últimos 2 archivos ---
-" Leader Tab → salta al buffer anterior
+" --- Alternar entre últimos 2 archivos ---
 nnoremap <leader><Tab> :b#<CR>
 
 " --- Buffers ---
 nnoremap <leader>bn :bnext<CR>
 nnoremap <leader>bp :bprevious<CR>
 nnoremap <leader>bd :bdelete<CR>
-nnoremap <leader>bl :buffers<CR>
 
 " --- FZF ---
 nnoremap <leader>ff :Files<CR>
 nnoremap <leader>fg :Rg<CR>
 nnoremap <leader>fb :Buffers<CR>
 nnoremap <leader>fh :History<CR>
+
+" --- Buscar en archivo actual ---
+nnoremap <leader>fs :BLines<CR>
 
 " --- CoC (autocompletado / LSP) ---
 inoremap <silent><expr> <TAB>
@@ -146,7 +153,6 @@ nmap <silent> gr <Plug>(coc-references)
 nmap <silent> K  :call ShowDocumentation()<CR>
 nmap <leader>rn  <Plug>(coc-rename)
 nmap <leader>f   :CocCommand editor.action.formatDocument<CR>
-nmap <leader>ca  <Plug>(coc-codeaction-cursor)
 
 function! ShowDocumentation()
   if CocAction('hasProvider', 'hover')
@@ -156,12 +162,12 @@ function! ShowDocumentation()
   endif
 endfunction
 
-" Diagnósticos
+" --- Diagnósticos (errores/warnings visuales) ---
 nmap <silent> [d <Plug>(coc-diagnostic-prev)
 nmap <silent> ]d <Plug>(coc-diagnostic-next)
 nnoremap <leader>d :CocDiagnostics<CR>
 
-" --- Splits / navegación entre ventanas ---
+" --- Splits ---
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
@@ -173,12 +179,6 @@ nnoremap <leader>q :q<CR>
 
 " --- Limpiar highlight de búsqueda ---
 nnoremap <Esc> :nohlsearch<CR>
-
-" --- Git (fugitive) ---
-nnoremap <leader>gs :Git status<CR>
-nnoremap <leader>gc :Git commit<CR>
-nnoremap <leader>gp :Git push<CR>
-nnoremap <leader>gl :Git log --oneline<CR>
 
 " --- Emmet (solo en HTML/Blade) ---
 let g:user_emmet_leader_key = '<C-z>'
@@ -198,11 +198,5 @@ let g:coc_global_extensions = [
 " ── FILETYPES ESPECIALES ─────────────────────────────────────
 autocmd BufRead,BufNewFile *.blade.php set filetype=blade
 autocmd FileType sql setlocal tabstop=2 shiftwidth=2
-
-" ── GITGUTTER ────────────────────────────────────────────────
-let g:gitgutter_enabled = 1
-let g:gitgutter_sign_added    = '▎'
-let g:gitgutter_sign_modified = '▎'
-let g:gitgutter_sign_removed  = '▎'
 
 " ── FIN ──────────────────────────────────────────────────────

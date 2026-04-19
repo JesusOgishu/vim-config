@@ -3,6 +3,12 @@
 "  PHP · JS · CSS · HTML · Blade · SQL
 " ============================================================
 
+" ── TERMINAL COMPAT (Kitty → servidor) ──────────────────────
+if $TERM == 'xterm-kitty' && !has('gui_running')
+  let &t_ut=''
+  set term=xterm-256color
+endif
+
 " ── PLUGIN MANAGER (vim-plug) ────────────────────────────────
 call plug#begin('~/.vim/plugged')
 
@@ -79,6 +85,13 @@ syntax on
 set termguicolors
 set background=dark
 colorscheme catppuccin_mocha
+
+" Fondo transparente (respeta la transparencia de Kitty)
+hi Normal      guibg=NONE ctermbg=NONE
+hi NormalNC    guibg=NONE ctermbg=NONE
+hi EndOfBuffer guibg=NONE ctermbg=NONE
+hi SignColumn  guibg=NONE ctermbg=NONE
+hi LineNr      guibg=NONE ctermbg=NONE
 
 let g:lightline = { 'colorscheme': 'catppuccin_mocha' }
 set laststatus=2

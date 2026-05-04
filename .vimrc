@@ -16,6 +16,9 @@ call plug#begin('~/.vim/plugged')
 Plug 'catppuccin/vim', { 'as': 'catppuccin' }
 Plug 'itchyny/lightline.vim'
 
+" --- Íconos (requiere Nerd Font en la terminal) ---
+Plug 'ryanoasis/vim-devicons'
+
 " --- Syntax highlight ---
 Plug 'sheerun/vim-polyglot'
 Plug 'jwalton512/vim-blade'
@@ -97,6 +100,14 @@ let g:lightline = { 'colorscheme': 'catppuccin_mocha' }
 set laststatus=2
 set noshowmode
 
+" ── DEVICONS (Netrw) ─────────────────────────────────────────
+" vim-devicons se engancha solo en Netrw si encoding=utf-8
+" Asegúrate de tener una Nerd Font activa en Kitty:
+"   https://www.nerdfonts.com/font-downloads
+"   En kitty.conf → font_family MesloLGS Nerd Font (o la que prefieras)
+let g:webdevicons_enable         = 1
+let g:webdevicons_enable_netrw   = 1
+
 " ── LEADER ───────────────────────────────────────────────────
 let mapleader = " "
 
@@ -148,6 +159,9 @@ nnoremap <leader>fh :History<CR>
 " --- Buscar en archivo actual ---
 nnoremap <leader>fs :BLines<CR>
 
+" --- Cerrar FZF con <Esc> (en lugar de quedar en modo normal) ---
+autocmd FileType fzf tnoremap <buffer> <Esc> <C-c>
+
 " --- CoC (autocompletado / LSP) ---
 inoremap <silent><expr> <TAB>
       \ coc#pum#visible() ? coc#pum#next(1) :
@@ -185,10 +199,6 @@ nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
-
-" --- Guardar y salir ---
-nnoremap <leader>w :w<CR>
-nnoremap <leader>q :q<CR>
 
 " --- Limpiar highlight de búsqueda ---
 nnoremap <Esc> :nohlsearch<CR>
